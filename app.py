@@ -1,15 +1,22 @@
-from flask import Flask
+from flask import Flask, g
+from datbase import connect_db, get_bd
 
 
 app = Flask(__name__)
 
 
-@app.route('/member')
+@app.teardown_appcontext
+def close_db(error):
+    if hasattr(g, 'sqlite_db'):
+        g.sqlite_db.close()
+
+
+@app.route('/members')
 def get_members():
     return 'returns all members'
 
 
-@app.route('member/<int:member_id>')
+@app.route('/member/<int:member_id>')
 def get_member(member_id):
     return 'Only one member'
 
