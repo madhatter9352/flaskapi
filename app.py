@@ -1,5 +1,5 @@
-from flask import Flask, g
-from datbase import connect_db, get_bd
+from flask import Flask, g, request, jsonify
+from database import connect_db, get_bd
 
 
 app = Flask(__name__)
@@ -23,6 +23,22 @@ def get_member(member_id):
 
 @app.route('/member', methods = ['POST'])
 def add_member():
+    if request.method == 'POST':
+        member_data = request.get_json()
+        name = member_data['name']
+        email = member_data['email']
+        level = member_data['level']
+
+        db = get_bd()
+        db.execute("insert into members(name, email, level) values(?, ?, ?)", [name, email, level])
+        db.commit()
+
+        member_cur = db.execute("select * from members where name = ?", [name])
+        new_member_check = member_cur.fetchone()
+
+        return jsonify({ 'id': new_member_check['id'], 'name': new_member_check['name'],
+                        'email': new_member_check['email'], 'level': new_member_check['level'] })
+
     return 'This adds a new member'
 
 

@@ -3,7 +3,7 @@ import sqlite3
 
 
 def connect_db():
-    sql = sqlite3.connect("/home/lazaro/Documentos/DBSQLITE/questandanswr.db", timeout=10)
+    sql = sqlite3.connect("/home/lazaro/Documentos/DBSQLITE/members.db", timeout=10)
     sql.row_factory = sqlite3.Row
     return sql
 
