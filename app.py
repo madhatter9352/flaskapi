@@ -33,7 +33,15 @@ def get_members():
 
 @app.route('/member/<int:member_id>')
 def get_member(member_id):
-    return 'Only one member'
+    db = get_bd()
+    member_cursor = db.execute("select * from members where id = ?", [member_id])
+    member_result = member_cursor.fetchone()
+
+    return jsonify({ 'id': member_result['id'],
+                     'name': member_result['name'],
+                     'email': member_result['email'],
+                     'level': member_result['level']
+                     })
 
 
 @app.route('/member', methods = ['POST'])
@@ -59,12 +67,33 @@ def add_member():
 
 @app.route('/member/<int:member_id>', methods = ['PUT', 'PATCH'])
 def edit_member(member_id):
-    return 'This edit a member'
+    db = get_bd()
+
+    member_data = request.get_json()
+    name = member_data['name']
+    email = member_data['email']
+    level = member_data['level']
+
+    db.execute("update members set name = ?, email = ?, level = ? where id = ?", [name, email, level, member_id])
+    db.commit()
+
+    member_cursor = db.execute("select * from members where id = ?", [member_id])
+    member_result = member_cursor.fetchone()
+
+    return jsonify({ 'id': member_id,
+                     'name': member_result['name'],
+                     'email': member_result['email'],
+                     'level': member_result['level']
+                     })
 
 
 @app.route('/member/<int:member_id>', methods = ['DELETE'])
 def delete_member(member_id):
-    return 'this delete a member'
+    db = get_bd()
+    db.execute("delete from members where id = ?", [member_id])
+    db.commit()
+
+    return 'delete successfully'
 
 
 if __name__ == '__main__':
