@@ -1,8 +1,22 @@
 from flask import Flask, g, request, jsonify
 from database import connect_db, get_bd
+from functools import wraps
 
 
 app = Flask(__name__)
+
+api_username = 'admin'
+api_password = 'admin'
+
+
+def protected(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if auth and auth.username == api_username and auth.password == api_password:
+            return f(*args, **kwargs)
+        return jsonify({'message': 'unauthorized'}), 401
+    return decorated
 
 
 @app.teardown_appcontext
@@ -12,6 +26,7 @@ def close_db(error):
 
 
 @app.route('/members')
+@protected
 def get_members():
     db = get_bd()
     members_curs = db.execute("select * from members order by id")
@@ -32,6 +47,7 @@ def get_members():
 
 
 @app.route('/member/<int:member_id>')
+@protected
 def get_member(member_id):
     db = get_bd()
     member_cursor = db.execute("select * from members where id = ?", [member_id])
